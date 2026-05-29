@@ -1,0 +1,37 @@
+# Dependencies
+frontend/node_modules/
+backend/.venv/
+backend/venv/
+.venv/
+venv/
+
+# Build output
+frontend/dist/
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# IDE & editor
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & debug
+*.log
+debug-*.log
+
+# Temp downloads
+video-downloads/

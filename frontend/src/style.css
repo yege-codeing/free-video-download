@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #0B0B0F;
+  --color-bg-secondary: #16161D;
+  --color-bg-tertiary: #1E1E28;
+  --color-border: #2A2A35;
+  --color-border-light: #3A3A48;
+
+  --color-accent: #FF6B6B;
+  --color-accent-gold: #FFD93D;
+  --color-accent-hover: #FF8585;
+
+  --color-text-primary: #F0F0F0;
+  --color-text-secondary: #9CA3AF;
+  --color-text-tertiary: #6B7280;
+
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 100%);
+}
+
+.gradient-border {
+  position: relative;
+  background: var(--color-bg-tertiary);
+  border-radius: 16px;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: 17px;
+  background: linear-gradient(135deg, rgba(255,107,107,0.3), rgba(255,217,61,0.3));
+  z-index: -1;
+}
+
+.glass-card {
+  background: rgba(22, 22, 29, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.glow-input:focus-within {
+  box-shadow: 0 0 24px rgba(255, 107, 107, 0.15), 0 0 48px rgba(255, 217, 61, 0.08);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 100%);
+  color: #0B0B0F;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.35);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(255,107,107,0.1); }
+  50% { box-shadow: 0 0 24px rgba(255,107,107,0.25); }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
