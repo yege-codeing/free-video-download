@@ -35,3 +35,6 @@ debug-*.log
 
 # Temp downloads
 video-downloads/
+
+# ASR model cache (downloaded on first use, ~200MB)
+backend/models/

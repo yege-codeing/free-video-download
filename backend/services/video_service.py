@@ -84,6 +84,7 @@ def _shared_ydl_opts(*, for_download: bool = False) -> dict:
         "retries": 3,
         "http_headers": {
             "Referer": "https://www.bilibili.com",
+            "Origin": "https://www.bilibili.com",
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                 "AppleWebKit/537.36 (KHTML, like Gecko) "

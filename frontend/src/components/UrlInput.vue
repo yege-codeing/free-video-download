@@ -37,7 +37,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
           </svg>
-          <span>{{ loading ? '解析中' : '解析' }}</span>
+          <span>{{ loading ? (loadingLabel || '解析中') : '解析' }}</span>
         </button>
       </div>
     </div>
@@ -53,6 +53,7 @@ import { ref } from 'vue'
 const props = defineProps({
   modelValue: { type: String, default: '' },
   loading: { type: Boolean, default: false },
+  loadingLabel: { type: String, default: '' },
   error: { type: String, default: '' },
 })
 

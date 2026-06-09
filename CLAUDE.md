@@ -49,11 +49,21 @@ User pastes URL
 ```
 backend/
 ├── main.py              # FastAPI entry, CORS, lifespan (cleanup on start)
+├── config.py            # Env config (MiniMax key/base_url/model) via python-dotenv
 ├── services/
 │   ├── video_service.py # Core: parse_video(), download_video(), cleanup_file()
-│   └── douyin_service.py # Special handling for Douyin short links + modal URLs
+│   ├── douyin_service.py # Special handling for Douyin short links + modal URLs
+│   ├── transcript_service.py # AI summary: subtitles → segments; ASR fallback
+│   ├── asr_service.py   # SenseVoice via sherpa-onnx (no login, no PyTorch)
+│   └── ai_service.py    # MiniMax (OpenAI-compatible): summarize_stream/chat_stream
 └── requirements.txt
 ```
+
+**AI summary feature (V2):** see [docs/ai-summary-design.md](docs/ai-summary-design.md).
+- `transcript_service.py` extracts subtitles via yt-dlp, then Bilibili `/x/v2/dm/view` (no cookie) for official CC/AI subs, then `asr_service.py` when none exist. Bilibili requests include `Origin: https://www.bilibili.com` to avoid HTTP 412. Returns `source` / `source_label` (`subtitle` vs `asr`).
+- `asr_service.py` downloads audio via yt-dlp, resamples with FFmpeg, transcribes with SenseVoice (sherpa-onnx). Model auto-downloads to `backend/models/sensevoice/` on first use (~200MB). Config: `ASR_ENABLED`, `SENSEVOICE_USE_INT8`, `ASR_MAX_DURATION_SECONDS`.
+- `ai_service.py` calls MiniMax-M2.7 via the OpenAI SDK (`base_url=https://api.minimaxi.com/v1`). Streams the summary then a structured chapters+mindmap JSON; strips `<think>` reasoning.
+- Requires `MINIMAX_API_KEY` in `backend/.env` (copy from `.env.example`). Download features work without it.
 
 **Key services in `video_service.py`:**
 - `_normalize_url()` — converts Douyin short/modal URLs to `/video/{id}` format
@@ -67,13 +77,17 @@ backend/
 ```
 frontend/src/
 ├── App.vue              # Root; orchestrates state via useVideoDownload composable
-├── components/          # NavBar, HeroSection, UrlInput, VideoCard, PlatformIcons, etc.
+├── components/          # NavBar, HeroSection, UrlInput, VideoCard, SummaryPanel, MindMap, etc.
 ├── composables/
-│   └── useVideoDownload.js  # All video state + API calls
+│   ├── useVideoDownload.js  # All video state + API calls
+│   └── useVideoSummary.js   # AI summary state + SSE
 ├── api/
-│   └── video.js        # parseVideo(), fetchDownloadVideo() (uses fetch for streaming), getPlatforms()
+│   ├── video.js        # parseVideo(), fetchDownloadVideo(), getPlatforms()
+│   └── summary.js      # getTranscript(), streamSummarize(), streamChat()
 └── style.css           # CSS variables, gradients, glass-card, btn-primary utility classes
 ```
+
+**MindMap PNG export (`MindMap.vue`):** uses `html-to-image` `toPng()` on the viewport wrapper (not raw SVG serialization—markmap text lives in `foreignObject`). Before capture, inline `color: #ffffff` on `.markmap-foreign` nodes so export matches dark-theme display. `SummaryPanel` switches to the mindmap tab and calls `mindmapRef.exportPng()` via `TabActions`.
 
 **Important state in `useVideoDownload`:**
 - `downloadPhase`: `idle | processing | transferring | saving`
@@ -85,7 +99,11 @@ frontend/src/
 |--------|------|-------------|
 | POST | `/api/parse` | Parse URL → metadata with format list |
 | GET | `/api/download` | Stream video file (client must cleanup via `background_tasks`) |
+| POST | `/api/transcript` | Extract subtitles → `segments` + `full_text` (AI summary) |
+| POST | `/api/summarize` | SSE stream: summary deltas → chapters+mindmap structure |
+| POST | `/api/chat` | SSE stream: stateless Q&A over the transcript |
 | GET | `/api/platforms` | Static list of supported platforms |
+| GET | `/api/ai-status` | Whether MiniMax API key is configured |
 | GET | `/api/health` | Health check |
 
 ## Styling System

@@ -112,3 +112,39 @@ body {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+/* Rendered markdown (AI summary) */
+.md-body {
+  color: var(--color-text-secondary);
+  font-size: 0.925rem;
+  line-height: 1.75;
+}
+.md-body h1, .md-body h2, .md-body h3 {
+  color: var(--color-text-primary);
+  font-weight: 700;
+  margin: 1.1em 0 0.5em;
+  line-height: 1.35;
+}
+.md-body h1 { font-size: 1.25rem; }
+.md-body h2 { font-size: 1.1rem; }
+.md-body h3 { font-size: 1rem; }
+.md-body h2:first-child, .md-body h1:first-child { margin-top: 0; }
+.md-body p { margin: 0.6em 0; }
+.md-body ul, .md-body ol { margin: 0.6em 0; padding-left: 1.4em; }
+.md-body ul { list-style: disc; }
+.md-body ol { list-style: decimal; }
+.md-body li { margin: 0.3em 0; }
+.md-body strong { color: var(--color-text-primary); font-weight: 600; }
+.md-body a { color: var(--color-accent); text-decoration: underline; }
+.md-body code {
+  background: var(--color-bg-tertiary);
+  padding: 0.1em 0.4em;
+  border-radius: 6px;
+  font-size: 0.85em;
+}
+.md-body blockquote {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 1em;
+  margin: 0.8em 0;
+  color: var(--color-text-tertiary);
+}

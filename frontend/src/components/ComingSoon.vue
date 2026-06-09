@@ -16,9 +16,9 @@
 
 <script setup>
 const features = [
-  { icon: '📝', title: 'AI 视频总结' },
   { icon: '🌐', title: '字幕翻译' },
   { icon: '📦', title: '批量下载' },
+  { icon: '✍️', title: '图文改写' },
   { icon: '💎', title: '会员专属' },
 ]
 </script>

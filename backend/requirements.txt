@@ -5,3 +5,7 @@ python-multipart
 requests
 imageio-ffmpeg
 gmssl
+openai
+python-dotenv
+sherpa-onnx
+soundfile

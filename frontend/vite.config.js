@@ -4,6 +4,9 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
+  optimizeDeps: {
+    include: ['html-to-image', 'markmap-lib', 'markmap-view'],
+  },
   server: {
     proxy: {
       '/api': {
