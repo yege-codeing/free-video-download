@@ -1,30 +1,15 @@
 <template>
-  <section class="px-4 mb-12">
-    <div class="glass-card p-6">
-      <h2 class="text-lg font-bold gradient-text mb-1 text-center">AI 视频总结</h2>
-      <p class="text-text-tertiary text-sm mb-6 text-center">粘贴视频链接，AI 帮你快速提炼大纲与核心要点</p>
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <div v-for="feat in features" :key="feat.title"
-             class="p-3 rounded-xl bg-bg-tertiary/50 border border-border/30">
-          <div class="text-2xl mb-1">{{ feat.icon }}</div>
-          <div class="text-xs font-medium text-text-secondary mb-0.5">{{ feat.title }}</div>
-          <div class="text-[11px] text-text-tertiary leading-snug">{{ feat.desc }}</div>
-        </div>
+  <section class="px-4 sm:px-6 mb-6">
+    <div class="text-center py-8 px-4 rounded-xl border border-dashed border-border/60 bg-bg-tertiary/30">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 text-accent mb-3">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+        </svg>
       </div>
-      <p class="text-text-tertiary text-[11px] mt-5 text-center">
-        优先使用平台字幕；B 站需登录的字幕会自动改用 SenseVoice 语音识别（无需登录，长视频需等待）
+      <p class="text-sm font-medium text-text-primary mb-1">粘贴视频链接，开始 AI 总结演示</p>
+      <p class="text-xs text-text-tertiary max-w-sm mx-auto">
+        优先使用平台字幕；无字幕时自动调用 SenseVoice 语音识别
       </p>
     </div>
   </section>
 </template>
-
-<script setup>
-const features = [
-  { icon: '📝', title: '结构化总结', desc: '一句话概述 + 核心要点' },
-  { icon: '🗂️', title: '章节时间戳', desc: '点击跳转源视频对应位置' },
-  { icon: '🎙️', title: 'SenseVoice 兜底', desc: '无字幕时本地语音识别，无需 B 站登录' },
-  { icon: '🧠', title: '思维导图', desc: '层级化梳理知识结构' },
-  { icon: '💬', title: 'AI 追问', desc: '基于视频内容深入问答' },
-  { icon: '⬇️', title: '分块导出', desc: '总结/章节/转录/导图/对话各自复制与导出' },
-]
-</script>

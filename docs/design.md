@@ -245,6 +245,8 @@ class VideoService:
 
 ## 三、前端设计
 
+> **V2 交互式产品演示布局**（2026-06-13）：详见 [interactive-product-demo-design.md](interactive-product-demo-design.md)。
+
 ### 3.1 UI 设计规范
 
 #### 配色方案

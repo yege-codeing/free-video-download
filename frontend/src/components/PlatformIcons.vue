@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 mb-10">
+  <div class="px-4 sm:px-6 mb-10">
     <p class="text-text-tertiary text-xs text-center mb-3">支持平台</p>
     <div class="flex flex-wrap justify-center gap-3">
       <div v-for="p in platforms" :key="p.id"

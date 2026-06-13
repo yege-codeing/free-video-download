@@ -77,15 +77,17 @@ backend/
 ```
 frontend/src/
 ├── App.vue              # Root; orchestrates state via useVideoDownload composable
-├── components/          # NavBar, HeroSection, UrlInput, VideoCard, SummaryPanel, MindMap, etc.
+├── components/          # NavBar, HeroSection, DemoFrame, DemoWalkthrough, UrlInput, VideoCard, etc.
 ├── composables/
 │   ├── useVideoDownload.js  # All video state + API calls
 │   └── useVideoSummary.js   # AI summary state + SSE
 ├── api/
 │   ├── video.js        # parseVideo(), fetchDownloadVideo(), getPlatforms()
 │   └── summary.js      # getTranscript(), streamSummarize(), streamChat()
-└── style.css           # CSS variables, gradients, glass-card, btn-primary utility classes
+└── style.css           # CSS variables, gradients, glass-card, demo layout utilities
 ```
+
+**Interactive Product Demo layout:** see [docs/interactive-product-demo-design.md](docs/interactive-product-demo-design.md).
 
 **MindMap PNG export (`MindMap.vue`):** uses `html-to-image` `toPng()` on the viewport wrapper (not raw SVG serialization—markmap text lives in `foreignObject`). Before capture, inline `color: #ffffff` on `.markmap-foreign` nodes so export matches dark-theme display. `SummaryPanel` switches to the mindmap tab and calls `mindmapRef.exportPng()` via `TabActions`.
 
