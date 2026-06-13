@@ -289,16 +289,65 @@ taskkill /PID <PID> /F
 | GET | `/api/ai-status` | AI / ASR 配置状态 |
 | GET | `/api/platforms` | 支持平台列表 |
 | GET | `/api/health` | 健康检查 |
+| GET | `/api/auth/captcha` | 获取登录验证码（SVG） |
+| POST | `/api/auth/login` | 登录（账号+密码+验证码） |
+| GET | `/api/auth/me` | 当前登录状态 |
+| POST | `/api/auth/logout` | 退出登录 |
+
+**登录保护：** 当 `AUTH_ENABLED=true` 时，除上述 auth 接口与 `/api/health` 外，所有 `/api/*` 均需有效 Session Cookie。
 
 ---
 
-## 十、相关文档
+## 十二、登录配置与验收
+
+### 12.1 环境变量
+
+在 `backend/.env` 中配置（模板见 `.env.example`）：
+
+| 变量 | 说明 |
+|------|------|
+| `AUTH_ENABLED` | `true` 开启登录门禁；本地开发可设 `false` 跳过 |
+| `AUTH_USERNAME` | 登录账号 |
+| `AUTH_PASSWORD` | 明文或 bcrypt 哈希（推荐生产用哈希） |
+| `AUTH_SESSION_SECRET` | Session 签名密钥，生产必须随机生成 |
+
+生成 bcrypt 密码哈希：
+
+```powershell
+cd backend
+python -c "from passlib.hash import bcrypt; print(bcrypt.hash('你的密码'))"
+```
+
+### 12.2 登录页与提示行为
+
+| 场景 | 提示文案 | 行为 |
+|------|----------|------|
+| 登录成功 | 登录成功 | Toast 显示于登录框中央，约 0.8s 后进入主界面 |
+| 密码错误 | 账号或密码错误 | Toast + 自动刷新验证码 |
+| 验证码错误 | 验证码错误 | Toast + 自动刷新验证码 |
+
+主界面导航栏右上角显示用户名与「退出」，字体样式与 SaveAny 渐变色一致。已移除 GitHub 链接、Hero「交互式产品演示」徽章、下载区「支持平台」列表。
+
+完整方案见 [auth-login-design.md](./auth-login-design.md)。
+
+### 12.3 验收步骤
+
+1. `AUTH_ENABLED=true`，配置账号密码，重启后端。
+2. 打开前端 → 应显示登录页。
+3. 错误验证码 / 错误密码 → 提示错误，不进入主界面。
+4. 正确登录 → 下载与 AI 总结功能正常。
+5. 点击「退出」→ 回到登录页；直接请求 `/api/parse` 返回 401。
+
+---
+
+## 十三、相关文档
 
 | 文档 | 内容 |
 |------|------|
 | [requirements.md](./requirements.md) | 产品需求 |
 | [design.md](./design.md) | 架构设计 |
 | [ai-summary-design.md](./ai-summary-design.md) | AI 总结方案 |
+| [auth-login-design.md](./auth-login-design.md) | 登录功能方案与实现 |
 | [CLAUDE.md](../CLAUDE.md) | 仓库开发约定（面向 AI/贡献者） |
 
 ---

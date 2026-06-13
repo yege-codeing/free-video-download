@@ -1,11 +1,13 @@
 import os
 import json
+import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import Depends, FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from starlette.middleware.sessions import SessionMiddleware
 
 import config
 from services.video_service import (
@@ -17,6 +19,7 @@ from services.video_service import (
 )
 from services.transcript_service import get_transcript, NoSubtitleError
 from services import ai_service
+from services import auth_service
 
 
 @asynccontextmanager
@@ -27,9 +30,24 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="万能视频下载 API", version="1.0.0", lifespan=lifespan)
 
+
+async def require_auth(request: Request) -> None:
+    if not config.is_auth_enabled():
+        return
+    if not request.session.get("authenticated"):
+        raise HTTPException(status_code=401, detail="未登录")
+
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=config.get_auth_session_secret(),
+    max_age=config.get_auth_session_max_age(),
+    same_site="lax",
+    https_only=False,
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=config.get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,6 +73,12 @@ class ChatRequest(BaseModel):
     question: str
 
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+    captcha: str
+
+
 def _sse(event_iter):
     """Serialize event dicts to the text/event-stream wire format."""
     for evt in event_iter:
@@ -76,7 +100,66 @@ class ApiResponse(BaseModel):
     data: dict | list | None = None
 
 
-@app.post("/api/parse")
+@app.get("/api/auth/captcha")
+async def api_auth_captcha(request: Request):
+    image = auth_service.create_captcha(request.session)
+    return {"code": 0, "message": "success", "data": {"image": image}}
+
+
+@app.post("/api/auth/login")
+async def api_auth_login(request: Request, req: LoginRequest):
+    if not config.is_auth_enabled():
+        return {"code": 0, "message": "登录成功", "data": {"username": req.username}}
+
+    lock_msg = auth_service.check_login_allowed(request)
+    if lock_msg:
+        return {"code": -1, "message": lock_msg, "data": None}
+
+    if not auth_service.verify_captcha(request.session, req.captcha):
+        auth_service.record_login_failure(request)
+        return {"code": -1, "message": "验证码错误", "data": None}
+
+    if not auth_service.authenticate(req.username, req.password):
+        auth_service.record_login_failure(request)
+        return {"code": -1, "message": "账号或密码错误", "data": None}
+
+    auth_service.clear_login_attempts(request)
+    request.session.clear()
+    request.session["authenticated"] = True
+    request.session["username"] = config.get_auth_username()
+    request.session["login_at"] = int(time.time())
+    return {
+        "code": 0,
+        "message": "登录成功",
+        "data": {"username": config.get_auth_username()},
+    }
+
+
+@app.get("/api/auth/me")
+async def api_auth_me(request: Request):
+    if not config.is_auth_enabled():
+        return {
+            "code": 0,
+            "data": {"authenticated": True, "username": "dev", "auth_enabled": False},
+        }
+    authenticated = bool(request.session.get("authenticated"))
+    return {
+        "code": 0,
+        "data": {
+            "authenticated": authenticated,
+            "username": request.session.get("username", "") if authenticated else "",
+            "auth_enabled": True,
+        },
+    }
+
+
+@app.post("/api/auth/logout")
+async def api_auth_logout(request: Request):
+    request.session.clear()
+    return {"code": 0, "message": "已退出登录", "data": None}
+
+
+@app.post("/api/parse", dependencies=[Depends(require_auth)])
 async def api_parse(req: ParseRequest):
     url = req.url.strip()
     if not url:
@@ -88,7 +171,7 @@ async def api_parse(req: ParseRequest):
         return {"code": -1, "message": f"解析失败：{str(e)}", "data": None}
 
 
-@app.get("/api/download")
+@app.get("/api/download", dependencies=[Depends(require_auth)])
 async def api_download(url: str, format_id: str, background_tasks: BackgroundTasks):
     if not url or not format_id:
         raise HTTPException(status_code=400, detail="缺少参数")
@@ -123,7 +206,7 @@ async def api_download(url: str, format_id: str, background_tasks: BackgroundTas
     )
 
 
-@app.post("/api/transcript")
+@app.post("/api/transcript", dependencies=[Depends(require_auth)])
 async def api_transcript(req: TranscriptRequest):
     url = req.url.strip()
     if not url:
@@ -139,7 +222,7 @@ async def api_transcript(req: TranscriptRequest):
         return {"code": -1, "message": f"字幕提取失败：{str(e)}", "data": None}
 
 
-@app.post("/api/summarize")
+@app.post("/api/summarize", dependencies=[Depends(require_auth)])
 async def api_summarize(req: SummarizeRequest):
     if not req.segments:
         raise HTTPException(status_code=400, detail="缺少字幕内容")
@@ -150,7 +233,7 @@ async def api_summarize(req: SummarizeRequest):
     )
 
 
-@app.post("/api/chat")
+@app.post("/api/chat", dependencies=[Depends(require_auth)])
 async def api_chat(req: ChatRequest):
     if not req.question.strip():
         raise HTTPException(status_code=400, detail="请输入问题")
@@ -163,12 +246,12 @@ async def api_chat(req: ChatRequest):
     )
 
 
-@app.get("/api/platforms")
+@app.get("/api/platforms", dependencies=[Depends(require_auth)])
 async def api_platforms():
     return {"code": 0, "data": get_platforms()}
 
 
-@app.get("/api/ai-status")
+@app.get("/api/ai-status", dependencies=[Depends(require_auth)])
 async def api_ai_status():
     return {"code": 0, "data": config.get_ai_status_detail()}
 

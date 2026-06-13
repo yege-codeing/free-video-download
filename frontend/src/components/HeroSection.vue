@@ -4,9 +4,7 @@
          style="background: radial-gradient(ellipse at center, rgba(255,107,107,0.3) 0%, rgba(255,217,61,0.1) 40%, transparent 70%);">
     </div>
 
-    <span class="demo-section-badge relative">交互式产品演示</span>
-
-    <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 mt-5 relative leading-tight">
+    <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 relative leading-tight">
       <span class="text-text-primary">万能视频</span>
       <span class="gradient-text">下载器</span>
     </h1>

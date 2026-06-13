@@ -451,7 +451,7 @@ server: {
 
 - **新功能页面**：使用 Vue Router 添加新页面（视频总结、字幕翻译等）
 - **付费弹窗**：新增 `components/PaymentModal.vue`
-- **用户系统**：新增 `composables/useAuth.js` + 登录/注册组件
+- **用户系统**：已实现 `composables/useAuth.js` + `LoginPage.vue`，详见 [auth-login-design.md](./auth-login-design.md)
 - **批量下载**：扩展 `UrlInput.vue` 支持多 URL 输入
 
 ### 6.3 部署扩展

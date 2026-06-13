@@ -1,6 +1,5 @@
-import axios from 'axios'
-
-const api = axios.create({ baseURL: '/api', timeout: 30000 })
+import { api, isUnauthorizedResponse } from './client.js'
+import { onUnauthorized } from '../composables/authState.js'
 
 /** Extract subtitles/transcript for a video. Throws Error with a friendly message. */
 export async function getTranscript(url) {
@@ -27,6 +26,10 @@ export async function getAiStatus() {
  * Calls onEvent(eventName, dataObject) for each complete event.
  */
 async function consumeSSE(response, onEvent) {
+  if (isUnauthorizedResponse(response)) {
+    onUnauthorized()
+    throw new Error('未登录或登录已过期')
+  }
   if (!response.ok) {
     let message = '请求失败'
     try {
@@ -79,6 +82,7 @@ export async function streamSummarize(title, segments, handlers = {}) {
   const response = await fetch('/api/summarize', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ title, segments }),
   })
   await consumeSSE(response, (name, data) => {
@@ -93,6 +97,7 @@ export async function streamChat(fullText, history, question, handlers = {}) {
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ full_text: fullText, history, question }),
   })
   await consumeSSE(response, (name, data) => {

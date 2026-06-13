@@ -1,9 +1,5 @@
-import axios from 'axios'
-
-const api = axios.create({
-  baseURL: '/api',
-  timeout: 30000,
-})
+import { api, isUnauthorizedResponse } from './client.js'
+import { onUnauthorized } from '../composables/authState.js'
 
 export async function parseVideo(url) {
   // Bilibili parse can exceed default 30s axios timeout
@@ -36,7 +32,14 @@ export async function fetchDownloadVideo(url, formatId, { onProgress, onPhase } 
   const params = new URLSearchParams({ url, format_id: formatId })
   onPhase?.('processing')
 
-  const response = await fetch(`/api/download?${params.toString()}`)
+  const response = await fetch(`/api/download?${params.toString()}`, {
+    credentials: 'include',
+  })
+
+  if (isUnauthorizedResponse(response)) {
+    onUnauthorized()
+    throw new Error('未登录或登录已过期')
+  }
 
   if (!response.ok) {
     let message = '下载失败'

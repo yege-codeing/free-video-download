@@ -1,6 +1,22 @@
 <template>
-  <div class="min-h-screen flex flex-col relative w-full max-w-5xl mx-auto">
-    <NavBar />
+  <div v-if="checking" class="min-h-screen flex items-center justify-center">
+    <svg class="w-8 h-8 animate-spin text-accent" fill="none" viewBox="0 0 24 24" aria-label="加载中">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+    </svg>
+  </div>
+
+  <LoginPage v-else-if="authEnabled && !isAuthenticated" />
+
+  <div v-else class="min-h-screen flex flex-col relative w-full max-w-5xl mx-auto">
+    <NavBar :username="username" @logout="handleLogout" />
+
+    <p
+      v-if="sessionMessage"
+      class="mx-4 mt-20 mb-0 text-center text-sm text-warning bg-warning/10 border border-warning/20 rounded-lg py-2 px-4"
+    >
+      {{ sessionMessage }}
+    </p>
 
     <main class="flex-1 relative">
       <HeroSection @scroll-to-demo="scrollToDemo" />
@@ -21,7 +37,6 @@
               @parse="handleParse"
               @clear="reset"
             />
-            <PlatformIcons />
             <VideoCardSkeleton v-if="loading && !videoInfo" />
             <VideoCard
               v-if="videoInfo"
@@ -72,14 +87,13 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 import NavBar from './components/NavBar.vue'
 import HeroSection from './components/HeroSection.vue'
 import DemoWalkthrough from './components/DemoWalkthrough.vue'
 import DemoFrame from './components/DemoFrame.vue'
 import ModeTabs from './components/ModeTabs.vue'
 import UrlInput from './components/UrlInput.vue'
-import PlatformIcons from './components/PlatformIcons.vue'
 import VideoCard from './components/VideoCard.vue'
 import VideoCardSkeleton from './components/VideoCardSkeleton.vue'
 import SummaryPanel from './components/SummaryPanel.vue'
@@ -87,8 +101,26 @@ import SummaryIntro from './components/SummaryIntro.vue'
 import FeatureHighlights from './components/FeatureHighlights.vue'
 import ComingSoon from './components/ComingSoon.vue'
 import FooterBar from './components/FooterBar.vue'
+import LoginPage from './components/LoginPage.vue'
 import { useVideoDownload } from './composables/useVideoDownload.js'
 import { useVideoSummary } from './composables/useVideoSummary.js'
+import { useAuth } from './composables/useAuth.js'
+
+const {
+  isAuthenticated,
+  username,
+  authEnabled,
+  checking,
+  sessionMessage,
+  checkAuth,
+  logout,
+} = useAuth()
+
+onMounted(checkAuth)
+
+async function handleLogout() {
+  await logout()
+}
 
 const mode = ref('download')
 function setMode(m) {

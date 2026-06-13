@@ -80,8 +80,12 @@ frontend/src/
 ├── components/          # NavBar, HeroSection, DemoFrame, DemoWalkthrough, UrlInput, VideoCard, etc.
 ├── composables/
 │   ├── useVideoDownload.js  # All video state + API calls
-│   └── useVideoSummary.js   # AI summary state + SSE
+│   ├── useVideoSummary.js   # AI summary state + SSE
+│   ├── useAuth.js           # Login session state + check/login/logout
+│   └── authState.js         # Shared auth refs (avoids circular imports)
 ├── api/
+│   ├── client.js       # Shared axios instance (withCredentials)
+│   ├── auth.js         # getCaptcha(), login(), logout(), getMe()
 │   ├── video.js        # parseVideo(), fetchDownloadVideo(), getPlatforms()
 │   └── summary.js      # getTranscript(), streamSummarize(), streamChat()
 └── style.css           # CSS variables, gradients, glass-card, demo layout utilities
@@ -107,6 +111,12 @@ frontend/src/
 | GET | `/api/platforms` | Static list of supported platforms |
 | GET | `/api/ai-status` | Whether MiniMax API key is configured |
 | GET | `/api/health` | Health check |
+| GET | `/api/auth/captcha` | Login captcha image (SVG data URL) |
+| POST | `/api/auth/login` | Login with username/password/captcha |
+| GET | `/api/auth/me` | Current session status |
+| POST | `/api/auth/logout` | Clear session |
+
+**Auth gate:** When `AUTH_ENABLED=true`, all business `/api/*` routes require a valid session cookie except `/api/auth/*` and `/api/health`. Configure via `AUTH_USERNAME`, `AUTH_PASSWORD`, `AUTH_SESSION_SECRET` in `backend/.env`.
 
 ## Styling System
 

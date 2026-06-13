@@ -117,6 +117,51 @@ def get_ytdlp_cookies_from_browser() -> str:
     return _read_env("YTDLP_COOKIES_FROM_BROWSER")
 
 
+def is_auth_enabled() -> bool:
+    return _read_env("AUTH_ENABLED", "true").lower() in ("1", "true", "yes", "on")
+
+
+def get_auth_username() -> str:
+    return _read_env("AUTH_USERNAME")
+
+
+def get_auth_password() -> str:
+    return _read_env("AUTH_PASSWORD")
+
+
+def get_auth_session_secret() -> str:
+    return _read_env("AUTH_SESSION_SECRET", "change-me-in-production")
+
+
+def get_auth_session_max_age() -> int:
+    raw = _read_env("AUTH_SESSION_MAX_AGE", "86400")
+    try:
+        return max(300, int(raw))
+    except ValueError:
+        return 86400
+
+
+def get_auth_login_max_attempts() -> int:
+    raw = _read_env("AUTH_LOGIN_MAX_ATTEMPTS", "5")
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return 5
+
+
+def get_auth_login_lockout_seconds() -> int:
+    raw = _read_env("AUTH_LOGIN_LOCKOUT_SECONDS", "300")
+    try:
+        return max(60, int(raw))
+    except ValueError:
+        return 300
+
+
+def get_cors_origins() -> list[str]:
+    raw = _read_env("CORS_ORIGINS", "http://localhost:5173,http://localhost:5174")
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+
 def is_ai_configured() -> bool:
     return bool(get_minimax_api_key())
 
